@@ -156,6 +156,9 @@ namespace SettlementProject.Controllers
         private async Task<SettlementsView> GetSettlementsList(int CurrentPageIndex, string sortSettlements, string SearchText = "")
         {
             ViewData["NameSortParam"] = string.IsNullOrEmpty(sortSettlements) ? "name_desc" : "";
+            //SELECT* from Settlement where Settlement.SettlementName LIKE Translate('turbh,', 'ertyuiopasdfghjkl;zxcvbnm,.', (N'קראטוןםפשדגכעיחלךףזסבהנמצתץ')) or Settlement.SettlementName = 'turbh'
+            string v = "SELECT * from Settlement where Settlement.SettlementName = Translate('" + SearchText + "', 'ertyuiopasdfghjkl;zxcvbnm,.', (N'קראטוןםפשדגכעיחלךףזסבהנמצתץ')) or Settlement.SettlementName =" + SearchText;
+            var query = v;
 
             int maxRowPerPage = 5;
             SettlementsView settlementsView = new SettlementsView();
@@ -163,18 +166,20 @@ namespace SettlementProject.Controllers
             {
                 if (sortSettlements == "name_desc")//מיון סדר עולה
                 {
-                    settlementsView.SettlementList = await (from settlemen in _context.Settlement where (settlemen.SettlementName.Contains(SearchText)) select settlemen)//חיפוש+סדר עולה
-                        .OrderBy(x => x.SettlementName)
+                    settlementsView.SettlementList = await _context.Set<Settlement>().FromSqlRaw(query)//חיפוש+סדר עולה
+                         .OrderBy(x => x.SettlementName)
                         .Skip((CurrentPageIndex - 1) * maxRowPerPage)
                         .Take(maxRowPerPage)
                         .ToListAsync();
                 }
                 else
-                    settlementsView.SettlementList = await (from settlemen in _context.Settlement where (settlemen.SettlementName.Contains(SearchText)) select settlemen)//חיפוש + סדר יורד
-                       .OrderByDescending(x => x.SettlementName)
-                     //  .Skip((CurrentPageIndex - 1) * maxRowPerPage)
-                       .Take(maxRowPerPage)
-                       .ToListAsync();
+                {
+         
+                    settlementsView.SettlementList = await _context.Set<Settlement>().FromSqlRaw(query).
+                        OrderByDescending(x => x.SettlementName).
+                        Take(maxRowPerPage)
+                        .ToListAsync();
+                }
             }
             else
                if (sortSettlements == null)
