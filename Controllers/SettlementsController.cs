@@ -156,8 +156,7 @@ namespace SettlementProject.Controllers
         private async Task<SettlementsView> GetSettlementsList(int CurrentPageIndex, string sortSettlements, string SearchText = "")
         {
             ViewData["NameSortParam"] = string.IsNullOrEmpty(sortSettlements) ? "name_desc" : "";
-            //SELECT* from Settlement where Settlement.SettlementName LIKE Translate('turbh,', 'ertyuiopasdfghjkl;zxcvbnm,.', (N'קראטוןםפשדגכעיחלךףזסבהנמצתץ')) or Settlement.SettlementName = 'turbh'
-            string v = "SELECT * from Settlement where Settlement.SettlementName = Translate('" + SearchText + "', 'ertyuiopasdfghjkl;zxcvbnm,.', (N'קראטוןםפשדגכעיחלךףזסבהנמצתץ')) or Settlement.SettlementName =" + SearchText;
+            string v = "SELECT * from Settlement where Settlement.SettlementName = Translate('" + SearchText + "', 'ertyuiopasdfghjkl;zxcvbnm,.', (N'קראטוןםפשדגכעיחלךףזסבהנמצתץ')) or Settlement.SettlementName = N'" + SearchText + "'";
             var query = v;
 
             int maxRowPerPage = 5;
@@ -175,9 +174,9 @@ namespace SettlementProject.Controllers
                 else
                 {
          
-                    settlementsView.SettlementList = await _context.Set<Settlement>().FromSqlRaw(query).
-                        OrderByDescending(x => x.SettlementName).
-                        Take(maxRowPerPage)
+                    settlementsView.SettlementList = await _context.Set<Settlement>().FromSqlRaw(query)
+                       //.OrderByDescending(x => x.SettlementName).
+                        //Take(maxRowPerPage)
                         .ToListAsync();
                 }
             }
