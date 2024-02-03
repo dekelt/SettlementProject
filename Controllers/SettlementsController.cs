@@ -155,6 +155,10 @@ namespace SettlementProject.Controllers
 
         private async Task<SettlementsView> GetSettlementsList(int CurrentPageIndex, string sortSettlements, string SearchText = "")
         {
+            if (CurrentPageIndex == 0)
+            {
+                CurrentPageIndex = 1;
+            }
             ViewData["NameSortParam"] = string.IsNullOrEmpty(sortSettlements) ? "name_desc" : "";
             string v = "SELECT * from Settlement where Settlement.SettlementName = Translate('" + SearchText + "', 'ertyuiopasdfghjkl;zxcvbnm,.', (N'קראטוןםפשדגכעיחלךףזסבהנמצתץ')) or Settlement.SettlementName = N'" + SearchText + "'";
             var query = v;
@@ -175,8 +179,8 @@ namespace SettlementProject.Controllers
                 {
          
                     settlementsView.SettlementList = await _context.Set<Settlement>().FromSqlRaw(query)
-                       //.OrderByDescending(x => x.SettlementName).
-                        //Take(maxRowPerPage)
+                     .OrderByDescending(x => x.SettlementName).
+                      Take(maxRowPerPage)
                         .ToListAsync();
                 }
             }
@@ -185,7 +189,7 @@ namespace SettlementProject.Controllers
             {
                 settlementsView.SettlementList = await (from settlemen in _context.Settlement select settlemen)//אין חיפוש סדר יורד
                     .OrderByDescending(x => x.SettlementName)
-                    .Skip((CurrentPageIndex - 1) * maxRowPerPage)
+                  .Skip((CurrentPageIndex - 1) * maxRowPerPage)
                     .Take(maxRowPerPage)
                     .ToListAsync();
             }
